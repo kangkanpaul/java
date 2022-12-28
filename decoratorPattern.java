@@ -1,5 +1,5 @@
 abstract class Shape{
-    String description = " what";
+    //String description = " what";
     public abstract String getDescription();
     public abstract float getCost();
 }
