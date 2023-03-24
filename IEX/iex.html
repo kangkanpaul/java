@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Cheerio Example</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cheerio@1.0.0-rc.5/dist/cheerio.min.js"></script>
+  </head>
+  <body>
+    <script>
+      $(function() {
+        // Load the HTML from the URL
+        $.get("https://www.iexindia.com/marketdata/areaprice.aspx", function(html) {
+          // Load the HTML into Cheerio
+          const $ = cheerio.load(html);
+          // Initialize an empty object to store the variables
+          const dams = {};
+          // Loop through the 96 divs with the specified titles
+          for (let i = 1; i <= 96; i++) {
+            const title = `Price on 21-02-2023 (${getInterval(i)}) for A1`;
+            const div = $(`div[title="${title}"]`);
+            const value = div.text().trim();
+            // Create a new variable in the dams object with the current index as the key
+            dams[`dam${i}`] = value;
+            // Log the value to the console
+            console.log(`dam${i}: ${value}`);
+          }
+          // Do something with the dams object, for example send it to a server via an AJAX request
+          $.post("/save-data", dams, function(response) {
+            console.log(response);
+          });
+        });
+      });
+
+      // Helper function to convert an index to the corresponding time interval
+      function getInterval(index) {
+        const startMinutes = (index - 1) * 15;
+        const startHours = Math.floor(startMinutes / 60);
+        const endMinutes = startMinutes + 15;
+        const endHours = Math.floor(endMinutes / 60);
+        return `${pad(startHours)}:${pad(startMinutes % 60)} - ${pad(endHours)}:${pad(endMinutes % 60)}`;
+      }
+
+      // Helper function to add leading zeros to a number
+      function pad(number) {
+        return number.toString().padStart(2, "0");
+      }
+    </script>
+  </body>
+</html>
